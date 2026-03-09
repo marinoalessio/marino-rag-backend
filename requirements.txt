@@ -1,3 +1,5 @@
+uvicorn
+gunicorn
 fastapi==0.135.1
 llama_index==0.14.15
 python-dotenv==1.2.2
