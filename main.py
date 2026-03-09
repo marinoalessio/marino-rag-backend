@@ -1,16 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from rag import get_query_engine, ask_question
+from rag import ask_question
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Init query engine...")
-    get_query_engine()
-    print("Ready!")
-    yield
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,

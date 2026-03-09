@@ -8,13 +8,6 @@ from qdrant_client import QdrantClient
 
 load_dotenv()
 
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-
-llm = Groq(
-    model="llama-3.3-70b-versatile",
-    api_key=os.getenv("GROQ_API_KEY")
-)
-
 qa_prompt = PromptTemplate(
     "You are an assistant that answers questions about Alessio Marino's career and background.\n"
     "Use ONLY the context below to answer accurately and in detail.\n"
@@ -29,12 +22,21 @@ _query_engine = None
 def get_query_engine():
     global _query_engine
     if _query_engine is None:
+        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        
+        llm = Groq(
+            model="llama-3.3-70b-versatile",
+            api_key=os.getenv("GROQ_API_KEY")
+        )
+        
         client = QdrantClient(
             url=os.getenv("QDRANT_URL", "http://localhost:6333"),
             api_key=os.getenv("QDRANT_API_KEY")
         )
+        
         vector_store = QdrantVectorStore(client=client, collection_name="career")
         index = VectorStoreIndex.from_vector_store(vector_store)
+        
         _query_engine = index.as_query_engine(
             llm=llm,
             text_qa_template=qa_prompt,
