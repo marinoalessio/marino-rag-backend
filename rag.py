@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
 from llama_index.llms.groq import Groq
 from qdrant_client import QdrantClient
 
@@ -22,7 +22,10 @@ _query_engine = None
 def get_query_engine():
     global _query_engine
     if _query_engine is None:
-        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        Settings.embed_model = HuggingFaceInferenceAPIEmbedding(
+            model_name="BAAI/bge-small-en-v1.5",
+            token=os.getenv("HF_TOKEN") 
+        )
         
         llm = Groq(
             model="llama-3.3-70b-versatile",
@@ -46,4 +49,9 @@ def get_query_engine():
     return _query_engine
 
 def ask_question(question: str) -> str:
-    return str(get_query_engine().query(question))
+    try:
+        engine = get_query_engine()
+        response = engine.query(question)
+        return str(response)
+    except Exception as e:
+        return f"Error processing the request: {str(e)}"
