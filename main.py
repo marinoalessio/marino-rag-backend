@@ -19,9 +19,9 @@ app.add_middleware(
 def health_check():
     return {"status": "online", "message": "Alessio Marino RAG API is running"}
 
-@app.get("/health")
-async def health():
-    return {"status": "online"}
+@app.head("/health")
+async def health_head():
+    return Response(status_code=200)
 
 @app.get("/chat")
 def chat(q: str):

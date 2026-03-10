@@ -34,7 +34,7 @@ print("Collection created")
 
 vector_store = QdrantVectorStore(client=client, collection_name="career")
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
-splitter = SentenceSplitter(chunk_size=128, chunk_overlap=30)
+splitter = SentenceSplitter(chunk_size=384, chunk_overlap=50) # was 128, 30
 nodes = splitter.get_nodes_from_documents(documents)
 print(f"Created chunks: {len(nodes)}")
 
