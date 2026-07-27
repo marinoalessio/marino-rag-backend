@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, Settings, StorageContext
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -7,8 +6,6 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from llama_index.core import SimpleDirectoryReader
-
-load_dotenv()
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
@@ -18,10 +15,7 @@ docs_path = os.path.join(BASE_DIR, "../documents")
 documents = SimpleDirectoryReader(docs_path).load_data()
 print(f"Loaded docs: {len(documents)}")
 
-client = QdrantClient(
-    url=os.getenv("QDRANT_URL", "http://localhost:6333"),
-    api_key=os.getenv("QDRANT_API_KEY")
-)
+client = QdrantClient(path=os.path.join(BASE_DIR, "qdrant_storage"))
 
 if client.collection_exists("career"):
     client.delete_collection("career")
