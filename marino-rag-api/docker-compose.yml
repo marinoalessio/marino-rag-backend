@@ -1,0 +1,33 @@
+services: 
+  app:
+    build:
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Inside the Compose network, "qdrant" is the hostname of the service
+      # no need for localhost.
+      - QDRANT_URL=http://qdrant:6333
+    volumes: 
+      # ../documents (on host) -> /documents (in the container)
+      - ../documents:documents:ro
+    depends_on:
+      qdrant:
+        condition: service_healthy 
+
+  qdrant: 
+    image: qdrant/qdrant:latest
+    ports: 
+      - "6333:6333"
+    volumes:
+      # data from Qdrant survive in restart/rebuild of the container
+      - qdrant_data:/qdrant/storage
+    healthcheck: 
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  qdrant_data:

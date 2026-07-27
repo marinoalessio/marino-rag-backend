@@ -1,0 +1,9 @@
+# Docker compose loads it together with the base when "docker compose up" is launched.
+# Here the code is mounted as a volume and the command is re-written to use uvicorn --reload,
+# so each modification of main.py/rag.py is done without rebuild
+
+services:
+  app:
+    volumes:
+      - .:/app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
