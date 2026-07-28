@@ -36,10 +36,9 @@ USER appuser
 ENV PATH=/home/appuser/.local/bin:$PATH 
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 8000
+EXPOSE 10000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \ 
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" || exit 1 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:10000/')" || exit 1
 
-# in production command 
-CMD ["sh", "-c", "gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:${PORT:-8000}"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:10000"]
