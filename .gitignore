@@ -2,3 +2,5 @@ venv/
 storage/
 .env
 __pycache__/
+documents/
+history.txt
