@@ -51,10 +51,7 @@ def get_query_engine():
             api_key=os.getenv("GROQ_API_KEY")
         )
         
-        client = QdrantClient(
-            url=os.getenv("QDRANT_URL"),
-            api_key=os.getenv("QDRANT_API_KEY")
-        )
+        client = QdrantClient(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "qdrant_storage"))
         
         vector_store = QdrantVectorStore(client=client, collection_name="career")
         index = VectorStoreIndex.from_vector_store(vector_store)

@@ -3,7 +3,6 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from rag import ask_question
-import subprocess
 
 app = FastAPI()
 
@@ -15,23 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# @app.get("/")
-# def health_check():
-#     return {"status": "online", "message": "Alessio Marino RAG API is running"}
-
 @app.get("/")
 def health_check():
-    try:
-        freeze_output = subprocess.check_output(["pip", "freeze"]).decode("utf-8")
-        packages = freeze_output.split('\n')
-    except Exception as e:
-        packages = [f"Errore nel recupero pacchetti: {str(e)}"]
-
-    return {
-        "status": "online", 
-        "message": "Alessio Marino RAG API is running",
-        "render_environment_freeze": packages
-    }
+    return {"status": "online", "message": "Alessio Marino RAG API is running"}
 
 @app.get("/chat")
 def chat(q: str):
