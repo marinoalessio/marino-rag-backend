@@ -29,8 +29,11 @@ class LightHFEmbedding(BaseEmbedding):
 
 qa_prompt = PromptTemplate(
     "You are an assistant that answers questions about Alessio Marino's career and background.\n"
-    "Use ONLY the context below to answer accurately and in detail.\n"
-    "If the context contains the answer, provide it fully. Do not say 'Empty Response'.\n\n"
+    "Use ONLY the context below.\n"
+    "Provide a concise but complete answer (4–6 sentences maximum).\n"
+    "Focus on the key facts: role, company, main responsibilities, and technologies.\n"
+    "Write in clear, professionally and avoid unnecessary explanations.\n"
+    "If the answer is present in the context, summarize it clearly.\n\n"
     "Context:\n{context_str}\n\n"
     "Question: {query_str}\n"
     "Answer:"

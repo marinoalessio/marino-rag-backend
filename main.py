@@ -1,6 +1,6 @@
 import os
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from rag import ask_question
 
@@ -17,6 +17,10 @@ app.add_middleware(
 @app.get("/")
 def health_check():
     return {"status": "online", "message": "Alessio Marino RAG API is running"}
+
+@app.head("/health")
+async def health_head():
+    return Response(status_code=200)
 
 @app.get("/chat")
 def chat(q: str):
