@@ -1,5 +1,5 @@
 import os
-from typing import Any, List
+from typing import Any, Dict, List
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
 from llama_index.core.embeddings import BaseEmbedding
@@ -29,10 +29,11 @@ class LightHFEmbedding(BaseEmbedding):
 
 qa_prompt = PromptTemplate(
     "You are an assistant that answers questions about Alessio Marino's career and background.\n"
-    "Use ONLY the context below.\n"
+    "Use ONLY the context below to answer.\n"
+    "If a conversation history is provided, use it to understand follow-up questions and maintain coherence.\n"
     "Provide a concise but complete answer (4–6 sentences maximum).\n"
     "Focus on the key facts: role, company, main responsibilities, and technologies.\n"
-    "Write in clear, professionally and avoid unnecessary explanations.\n"
+    "Write clearly and professionally, avoid unnecessary explanations.\n"
     "If the answer is present in the context, summarize it clearly.\n\n"
     "Context:\n{context_str}\n\n"
     "Question: {query_str}\n"
@@ -66,8 +67,20 @@ def get_query_engine():
         )
     return _query_engine
 
-def ask_question(question: str) -> str:
+def _format_history(history: List[Dict]) -> str:
+    lines = []
+    for msg in history:
+        role = "User" if msg["role"] == "user" else "Assistant"
+        lines.append(f"{role}: {msg['content']}")
+    return "\n".join(lines)
+
+def ask_question(question: str, history: List[Dict] = []) -> str:
     try:
-        return str(get_query_engine().query(question))
+        if history:
+            history_str = _format_history(history)
+            augmented = f"Conversation so far:\n{history_str}\n\nCurrent question: {question}"
+        else:
+            augmented = question
+        return str(get_query_engine().query(augmented))
     except Exception as e:
         return f"Error: {str(e)}"
