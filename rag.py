@@ -1,6 +1,6 @@
 import os
 from datetime import date
-from typing import Any, List
+from typing import Any, Dict, List
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
 from llama_index.core.embeddings import BaseEmbedding
@@ -31,7 +31,7 @@ class LightHFEmbedding(BaseEmbedding):
 def build_prompt() -> PromptTemplate:
     today = date.today().strftime("%B %d, %Y")
     return PromptTemplate(
-        f"You are an assistant that answers questions about Alessio Marino's career and background.\n"
+        f"You are an assistant that ONLY answers questions about Alessio Marino's career and background.\n"
         f"Today's date is {today}. Use it to calculate ages or durations when needed.\n"
         "Use ONLY the context below.\n"
         "Provide a concise but complete answer (4–6 sentences maximum).\n"
@@ -71,8 +71,20 @@ def get_query_engine():
         )
     return _query_engine
 
-def ask_question(question: str) -> str:
+def _format_history(history: List[Dict]) -> str:
+    lines = []
+    for msg in history:
+        role = "User" if msg["role"] == "user" else "Assistant"
+        lines.append(f"{role}: {msg['content']}")
+    return "\n".join(lines)
+
+def ask_question(question: str, history: List[Dict] = []) -> str:
     try:
-        return str(get_query_engine().query(question))
+        if history:
+            history_str = _format_history(history)
+            augmented = f"Conversation so far:\n{history_str}\n\nCurrent question: {question}"
+        else:
+            augmented = question
+        return str(get_query_engine().query(augmented))
     except Exception as e:
         return f"Error: {str(e)}"
