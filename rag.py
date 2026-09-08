@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from typing import Any, List
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
@@ -27,17 +28,20 @@ class LightHFEmbedding(BaseEmbedding):
     async def _aget_query_embedding(self, query: str) -> List[float]:
         return self._get_query_embedding(query)
 
-qa_prompt = PromptTemplate(
-    "You are an assistant that answers questions about Alessio Marino's career and background.\n"
-    "Use ONLY the context below.\n"
-    "Provide a concise but complete answer (4–6 sentences maximum).\n"
-    "Focus on the key facts: role, company, main responsibilities, and technologies.\n"
-    "Write in clear, professionally and avoid unnecessary explanations.\n"
-    "If the answer is present in the context, summarize it clearly.\n\n"
-    "Context:\n{context_str}\n\n"
-    "Question: {query_str}\n"
-    "Answer:"
-)
+def build_prompt() -> PromptTemplate:
+    today = date.today().strftime("%B %d, %Y")
+    return PromptTemplate(
+        f"You are an assistant that answers questions about Alessio Marino's career and background.\n"
+        f"Today's date is {today}. Use it to calculate ages or durations when needed.\n"
+        "Use ONLY the context below.\n"
+        "Provide a concise but complete answer (4–6 sentences maximum).\n"
+        "Focus on the key facts: role, company, main responsibilities, and technologies.\n"
+        "Write in clear, professionally and avoid unnecessary explanations.\n"
+        "If the answer is present in the context, summarize it clearly.\n\n"
+        "Context:\n{context_str}\n\n"
+        "Question: {query_str}\n"
+        "Answer:"
+    )
 
 _query_engine = None
 
@@ -45,13 +49,14 @@ def get_query_engine():
     global _query_engine
     if _query_engine is None:
         Settings.embed_model = LightHFEmbedding(
-            model_name="BAAI/bge-small-en-v1.5",
+            model_name="BAAI/bge-base-en-v1.5",
             token=os.getenv("HF_TOKEN")
         )
         
         Settings.llm = Groq(
-            model="llama-3.3-70b-versatile",
-            api_key=os.getenv("GROQ_API_KEY")
+            model="qwen/qwen3.8-27b",
+            api_key=os.getenv("GROQ_API_KEY"),
+            max_tokens=512
         )
         
         client = QdrantClient(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "qdrant_storage"))
@@ -60,7 +65,7 @@ def get_query_engine():
         index = VectorStoreIndex.from_vector_store(vector_store)
         
         _query_engine = index.as_query_engine(
-            text_qa_template=qa_prompt,
+            text_qa_template=build_prompt(),
             similarity_top_k=5,
             response_mode="compact"
         )
