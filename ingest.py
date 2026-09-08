@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from llama_index.core import SimpleDirectoryReader
 
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 docs_path = os.path.join(BASE_DIR, "../documents")
@@ -22,13 +22,13 @@ if client.collection_exists("career"):
 
 client.create_collection(
     collection_name="career",
-    vectors_config=VectorParams(size=384, distance=Distance.COSINE)
+    vectors_config=VectorParams(size=768, distance=Distance.COSINE)
 )
 print("Collection created")
 
 vector_store = QdrantVectorStore(client=client, collection_name="career")
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
-splitter = SentenceSplitter(chunk_size=384, chunk_overlap=50) # was 128, 30
+splitter = SentenceSplitter(chunk_size=384, chunk_overlap=50)
 nodes = splitter.get_nodes_from_documents(documents)
 print(f"Created chunks: {len(nodes)}")
 
